@@ -1,5 +1,5 @@
 import streamlit as st
-from backend import *
+from backendnoise import *
 import pandas as pd
 import matplotlib.pyplot as plot
 
@@ -85,12 +85,9 @@ def main():
 
     We compare the following optimizers:
 
-    - **SGD (Stochastic Gradient Descent)**
+    - **SGD (Stochastic Gradient Descent) with Constant Learning rate**
     - **SGD with Momentum**
-    - **SGD with Decay**
-    - **Adagrad**
-    - **RMSprop**
-    - **Adam**
+    - **SGD with Learning Rate Decay**
 
     By leveraging quantum algorithms, we introduce noise to the training process in a controlled and efficient manner, allowing for enhanced privacy protection while maintaining model performance.
 
@@ -100,44 +97,38 @@ def main():
    # Create a form for user input
     with st.form("optimizer_params"):
        st.write("## Optimizer Parameters")
+       sgd_max_grad_norm = st.number_input("SGD Max Gradient Norm", value=1.0, step=0.1)
+       sgd_noise_multiplier = st.number_input("SGD Noise Multiplier", value=0.1, step=0.01)
 
        # SGD
-       sgd_lr = st.number_input("SGD Learning Rate", value=1.0, step=0.1)
-       sgd_decay = st.number_input("SGD Decay", value=0.0, step=0.001)
-       sgd_momentum = st.number_input("SGD Momentum", value=0.0, min_value=0.0, max_value=1.0, step=0.1)
+       sgd_lr = st.number_input("SGD : Learning Rate", value=1.0, step=0.1)
 
     #    # SGD with Momentum
-    #    sgd_mom_lr = st.number_input("SGD with Momentum Learning Rate", value=0.85, step=0.01)
-    #    sgd_mom_decay = st.number_input("SGD with Momentum Decay", value=0.001, step=0.0001)
-    #    sgd_mom_momentum = st.number_input("SGD with Momentum Momentum", value=0.9, min_value=0.0, max_value=1.0, step=0.1)
+       sgd_mom_lr = st.number_input("SGD with Momentum :  Learning Rate", value=0.85, step=0.01)
+       sgd_mom_decay = st.number_input("SGD with Momentum : Decay", value=0.001, step=0.0001)
+       sgd_mom_momentum = st.number_input("SGD with Momentum : Momentum", value=0.9, min_value=0.0, max_value=1.0, step=0.1)
 
     #    # SGD with Decay
-    #    sgd_decay_lr = st.number_input("SGD with Decay Learning Rate", value=0.85, step=0.01)
-    #    sgd_decay_decay = st.number_input("SGD with Decay Decay", value=0.001, step=0.0001)
+       sgd_decay_lr = st.number_input("SGD with Decay : Learning Rate", value=0.85, step=0.01)
+       sgd_decay_decay = st.number_input("SGD with Decay:  Decay", value=0.001, step=0.0001)
 
        submitted = st.form_submit_button("Start Training Models")
 
     if submitted:
-        SGD_optimizer_with_momentum = Optimizer_SGD(learning_rate=0.85,decay=1e-3,momentum=0.9)
-        SGD_optimizer_lr_decay = Optimizer_SGD(learning_rate=0.85,decay=1e-3,momentum=0)
-        SGD_optimizer = Optimizer_SGD(learning_rate=sgd_lr,decay=sgd_decay,momentum=sgd_momentum)
-        adagrad_optimizer = Optimizer_Adagrad()
-        rmsprop_optimizer = Optimizer_RMSprop()
-        adam_optimizer = Optimizer_Adam()
+        SGD_optimizer_with_momentum = Optimizer_SGD(learning_rate=sgd_mom_lr ,decay=sgd_mom_decay,momentum=sgd_mom_momentum,max_grad_norm=sgd_max_grad_norm, noise_multiplier=sgd_noise_multiplier)
+        SGD_optimizer_lr_decay = Optimizer_SGD(learning_rate=sgd_decay_lr ,decay=sgd_decay_decay,momentum=0,max_grad_norm=sgd_max_grad_norm, noise_multiplier=sgd_noise_multiplier)
+        SGD_optimizer = Optimizer_SGD(learning_rate=sgd_lr,max_grad_norm=sgd_max_grad_norm, noise_multiplier=sgd_noise_multiplier)
 
         # Train with optimizers
         SGD_with_decay_momentum_acc=train(optimizername=SGD_optimizer_with_momentum,namestr="SGD with Decay and Momentum")
         SGD_with_decay_acc = train(optimizername=SGD_optimizer_lr_decay,namestr="SGD with LR Decay")
         SGD_with_const_lr_acc = train(optimizername=SGD_optimizer, namestr="SGD with constant LR")
-        adagrad_acc = train(optimizername=adagrad_optimizer,namestr="ADA Grad")
-        rmsprop_acc = train(optimizername=rmsprop_optimizer,namestr="RMSprop")
-        adam_acc = train(optimizername=adam_optimizer,namestr="ADAM")
 
         epoch = [x for x in range(0, 10001, 100)]
         acc_dict = {"Epoch": epoch,
-                "Adam": adam_acc,
-                "RMSprop": rmsprop_acc,
-                "Adagrad":adagrad_acc,
+                # "Adam": adam_acc,
+                # "RMSprop": rmsprop_acc,
+                # "Adagrad":adagrad_acc,
                 #"SGD":sgd_acc}
                 "SGD_with_decay_momentum":SGD_with_decay_momentum_acc,
                 "SGD_with_decay": SGD_with_decay_acc,
@@ -153,16 +144,16 @@ def main():
         # ax.set_title('Comparison of Optimizers', fontsize=14, fontweight='bold')
         # st.pyplot(fig)
         p = figure(
-        title='Comparision of Algorithms',
+        title='Comparision of Optimizers with Noise',
         x_axis_label='Number of Epochs',
         y_axis_label='Accuracy')
 
-        p.line(df["Epoch"],df["Adam"], legend_label='ADAM',line_color='green', line_width=2)
-        p.line(df["Epoch"],df["RMSprop"], legend_label='RMS Prop',line_color='red', line_width=2)
-        p.line(df["Epoch"],df["Adagrad"], legend_label='ADA Grad',line_color='black', line_width=2)
-        p.line(df["Epoch"],df["SGD_with_decay_momentum"], legend_label='SGD with Momentum',line_color='orange', line_width=2)
+        # p.line(df["Epoch"],df["Adam"], legend_label='ADAM',line_color='green', line_width=2)
+        # p.line(df["Epoch"],df["RMSprop"], legend_label='RMS Prop',line_color='red', line_width=2)
+        # p.line(df["Epoch"],df["Adagrad"], legend_label='ADA Grad',line_color='black', line_width=2)
+        p.line(df["Epoch"],df["SGD_with_decay_momentum"], legend_label='SGD with Momentum',line_color='red', line_width=2)
         p.line(df["Epoch"],df["SGD_with_decay"], legend_label='SGD with Decay',line_color='blue', line_width=2)
-        p.line(df["Epoch"],df["SGD_with_const_lr"], legend_label='SGD with Constant Learning Rate',line_color='brown',line_width=2)
+        p.line(df["Epoch"],df["SGD_with_const_lr"], legend_label='SGD with Constant Learning Rate',line_color='green',line_width=2)
     
         st.bokeh_chart(p, use_container_width=True)
 
