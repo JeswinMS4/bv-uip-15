@@ -4,15 +4,14 @@ from nnfs.datasets import spiral_data
 
 nnfs.init()
 
-
-
 # Dense layer
 class Layer_Dense:
 
     # Layer initialization
     def __init__(self, n_inputs, n_neurons):
         # Initialize weights and biases
-        self.weights = 0.01 * np.random.randn(n_inputs, n_neurons)
+        rgm =np.random.RandomState(42)
+        self.weights = 0.01 * rgm.randn(n_inputs, n_neurons)
         self.biases = np.zeros((1, n_neurons))
 
     # Forward pass
