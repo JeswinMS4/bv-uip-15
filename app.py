@@ -1,5 +1,5 @@
 import streamlit as st
-from backendnoise import *
+from backend import *
 import pandas as pd
 import matplotlib.pyplot as plot
 
@@ -97,8 +97,6 @@ def main():
    # Create a form for user input
     with st.form("optimizer_params"):
        st.write("## Optimizer Parameters")
-       sgd_max_grad_norm = st.number_input("SGD Max Gradient Norm", value=1.0, step=0.1)
-       sgd_noise_multiplier = st.number_input("SGD Noise Multiplier", value=0.1, step=0.01)
 
        # SGD
        sgd_lr = st.number_input("SGD : Learning Rate", value=1.0, step=0.1)
@@ -115,9 +113,9 @@ def main():
        submitted = st.form_submit_button("Start Training Models")
 
     if submitted:
-        SGD_optimizer_with_momentum = Optimizer_SGD(learning_rate=sgd_mom_lr ,decay=sgd_mom_decay,momentum=sgd_mom_momentum,max_grad_norm=sgd_max_grad_norm, noise_multiplier=sgd_noise_multiplier)
-        SGD_optimizer_lr_decay = Optimizer_SGD(learning_rate=sgd_decay_lr ,decay=sgd_decay_decay,momentum=0,max_grad_norm=sgd_max_grad_norm, noise_multiplier=sgd_noise_multiplier)
-        SGD_optimizer = Optimizer_SGD(learning_rate=sgd_lr,max_grad_norm=sgd_max_grad_norm, noise_multiplier=sgd_noise_multiplier)
+        SGD_optimizer_with_momentum = Optimizer_SGD(learning_rate=sgd_mom_lr ,decay=sgd_mom_decay,momentum=sgd_mom_momentum)
+        SGD_optimizer_lr_decay = Optimizer_SGD(learning_rate=sgd_decay_lr ,decay=sgd_decay_decay,momentum=0)
+        SGD_optimizer = Optimizer_SGD(learning_rate=sgd_lr)
 
         # Train with optimizers
         SGD_with_decay_momentum_acc=train(optimizername=SGD_optimizer_with_momentum,namestr="SGD with Decay and Momentum")
@@ -144,7 +142,7 @@ def main():
         # ax.set_title('Comparison of Optimizers', fontsize=14, fontweight='bold')
         # st.pyplot(fig)
         p = figure(
-        title='Comparision of Optimizers with Noise',
+        title='Comparision of Optimizers without Noise',
         x_axis_label='Number of Epochs',
         y_axis_label='Accuracy')
 
